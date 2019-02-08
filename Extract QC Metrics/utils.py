@@ -3,27 +3,53 @@ import numpy as np
 import re
 
 
+def evidheaders(evid_cols, isoxid, isphos, isdeam, verbose=False):
+    """Depending on how the MQ analysis was done, it chooses which columns should be loaded from the evidence.txt file"""
+    evid_cols = evid_cols + ['Experiment']
+    evid_cols = evid_cols + ['Oxidation (M)'] if isoxid else evid_cols
+    evid_cols = evid_cols + ['Phospho (STY)'] if isphos else evid_cols
+    evid_cols = evid_cols + ['Deamidation (NQ)'] if isdeam else evid_cols
+
+    if verbose:
+        print('Columns that will be loaded from evidence.txt:')
+        print("\n".join(evid_cols))
+
+    return evid_cols
+
+
+def protheaders(prot_cols, list_expe, isexpe, islfq, ismatc, verbose=False):
+    """Depending on how the MQ analysis was done, it chooses which columns should be loaded from the proteinGroups.txt file"""
+    prot_cols_isexpet = ['Intensity ' + s for s in list_expe] + ['Razor + unique peptides ' + s for s in list_expe] + ['Sequence coverage ' + s for s in list_expe + ' [%]']
+    prot_cols_islfqt = ['LFQ intensity ' + s for s in list_expe]
+    prot_cols_ismatct = ['Identification type ' + s for s in list_expe]
+    prot_cols = prot_cols + prot_cols_isexpet if isexpe else prot_cols
+    prot_cols = prot_cols + prot_cols_islfqt if islfq else prot_cols
+    prot_cols = prot_cols + prot_cols_ismatct if ismatc else prot_cols
+
+    if verbose:
+        print('Columns that will be loaded from proteinGroups.txt:')
+        print("\n".join(prot_cols))
+
+    return prot_cols
+
+
+
 def read_first(mqoutput):
     """Reads first 10 rows of a MQ txt file (all columns) changing column headers
     (some header renaming, all lowercases, no spaces, no slashes, no parenthesis)
     Used to check from evidence.txt how the MQanalysis was done (phospho? oxidations?...)"""
 
     df = pd.read_table(mqoutput, sep='\t', nrows=10)
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('/', '').str.replace('(',
-                                                                                                           '').str.replace(
-        ')', '')
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
     return df
 
 
 def read_mq_small(mqoutput, selection):
     """Reads all rows of a MQ txt file (selected columns) changing column headers
-    If a raw_file column is present: it keeps only rows with values present in 'list_raws'
     (some header renaming, all lowercases, no spaces, no slashes, no parenthesis)"""
 
     df = pd.read_table(mqoutput, usecols=selection, sep='\t')
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('/', '').str.replace('(',
-                                                                                                           '').str.replace(
-        ')', '')
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
     return df
 
 
@@ -42,9 +68,7 @@ def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start, time_end,
     column_dict = {'Contaminant': 'Potential_contaminant',
                    'Av_ Absolute Mass Deviation': 'Av_ Absolute Mass Deviation [ppm]'}
     df.columns = [column_dict.get(x, x) for x in df.columns]
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('/', '').str.replace('(',
-                                                                                                           '').str.replace(
-        ')', '')
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
     if ('raw_file' in list(df.columns)) & (len(list_raws) > 0):
         df = df.loc[df['raw_file'].isin(list_raws)]
         df = df.loc[df['raw_file'].str.contains(filter_ms)]
