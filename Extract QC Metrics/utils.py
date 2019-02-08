@@ -53,7 +53,7 @@ def read_mq_small(mqoutput, selection):
     return df
 
 
-def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start, time_end, boxplot_slice, mz_slice):
+def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_end=120, boxplot_slice=10, mz_slice=100):
     """Reads all rows of a MQ txt file (selected columns) changing column headers
     (some header renaming, all lowercases, no spaces, no slashes, no parenthesis)
     If a raw_file column is present: it keeps only rows with values present in 'list_raws'
@@ -148,7 +148,7 @@ def make_the_pct(df, list_raws, column_of_interest, criteria, isinclude=False, v
     return qc1, qc2
 
 
-def run_qc(df, columns_of_interest, output_name, time_min, time_max):
+def run_qc(df, columns_of_interest, output_name, time_min=20, time_max=90):
     df = df[(df.retention_time >= time_min) & (df.retention_time <= time_max)]
     df_qc = df.groupby('raw_file')[columns_of_interest].median().reset_index()
     df_qc.columns = [
