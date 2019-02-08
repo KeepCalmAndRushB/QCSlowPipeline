@@ -285,6 +285,3 @@ def mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, al
     qc = qc.iloc[:, [52, 55, 53, 54, 0, 7, 10, 2, 3, 12, 11, 4, 5, 8, 9, 6, 17, 13, 14, 16, 27, 28, 29, 32, 33, 30, 31, 34, 35, 22, 21, 18, 19, 20, 24, 23, 25, 26, 45, 44, 15, 38, 39, 40, 41, 37, 36, 42, 43, 46, 47, 48, 1, 49, 50, 51]]
     return qc
 
-
-def writeresults(df, text, pre_name):
-    df.to_csv(pre_name + text, sep='\t', header=True, index=False)

@@ -9,12 +9,11 @@ def main(path_read, path_write, filter_MS='QEp|QX'):
     para = utils.read_mq_small(path_read + 'combined/txt/parameters.txt', cols.para)
 
     evid = utils.read_first(path_read + 'combined/txt/evidence.txt')
-
-    isMatc = list(para['value'][para['parameter'] == 'Match between runs'] == 'True')[0]
+    isMatc = False
     mq_vers = list(para['value'][para['parameter'] == 'Version'])[0]
 
-    isOxid = True if 'oxidation_m' in list(evid.columns) else False
-    isDeam = True if 'deamidation_NQ' in list(evid.columns) else False
+    isOxid = True
+    isDeam = False
 
     cols.evid = utils.evidheaders(cols.evid, isOxid, isPhos, isDeam)
 
@@ -111,10 +110,8 @@ def main(path_read, path_write, filter_MS='QEp|QX'):
 
     # todo: fix export
     qc = utils.mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, allp_qc, prot_qc2, file_label)
+    qc.to_csv(path_write + 'QC_Results.tab', sep='\t', header=True, index=False)
 
-
-
-    # utils.writeresults(qc, '_QC_Results.tab', pre_name)
     # utils.writeresults(cont_qc_values, 'Contaminants.tab', pre_name)
     # utils.writeresults(miss_qc_values, 'Missed_cleavages_KR.tab', pre_name)
     # utils.writeresults(miss_kqc_values, 'Missed_cleavages_K.tab', pre_name)
@@ -124,16 +121,18 @@ def main(path_read, path_write, filter_MS='QEp|QX'):
     # utils.writeresults(mz_range_qc, 'ID_per_mz.tab', pre_name)
     # utils.writeresults(z_range_qc, 'ID_per_charge.tab', pre_name)
     # utils.writeresults(se_range_qc, 'ID_per_Scan_number.tab', pre_name)
-    # if isDeam:
-    #     utils.writeresults(deam_qc_values, 'Deamidations.tab', pre_name)
-    # if isOxid:
-    #     utils.writeresults(oxid_qc_values, 'Oxidations.tab', pre_name)
-    #
+    # utils.writeresults(oxid_qc_values, 'Oxidations.tab', pre_name)
+
 
 
 if __name__ == '__main__':
-    path_read = 'F:/Python_tests/Mq16210_ExpON_MbrON_LFQON/'
-    path_write = 'F:/Results/'
 
-    main(path_read=path_read, path_write=path_read)
+    import argparse
+    parser = argparse.ArgumentParser(description="Extract QC Metrics.")
+    parser.add_argument('path_read', default='F:/Python_tests/Mq16210_ExpON_MbrON_LFQON/', help="The Folder with one MQ-analyzed RAWfile")
+    parser.add_argument('path_write', default='F:/Results/', help="The Folder where we save for now the QC results in tab format")
+
+    args = parser.parse_args()
+
+    main(path_read=args.path_read, path_write=args.path_read)
 
