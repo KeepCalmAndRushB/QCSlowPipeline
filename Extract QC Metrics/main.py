@@ -2,24 +2,15 @@ import time
 import pandas as pd
 import numpy as np
 import utils
-import checks
 import headers
 import params as p
-time_01 = time.time()
 
-checks.directory(p.path_read)
-checks.directory(p.path_write)
 
 runn = utils.read_mq_small(p.path_read + 'combined/proc/#runningTimes.txt', p.runn_cols)
-isRunn = checks.mqdone(runn, p.path_read, start_delay=2)
 
 para = utils.read_mq_small(p.path_read + 'combined/txt/parameters.txt', p.para_cols)
-isPeak = checks.peakproperties(para)
 
 evid = utils.read_first(p.path_read + 'combined/txt/evidence.txt')
-isExpe = checks.experiments(evid)
-
-isLfq = checks.lfqison(p.path_read + 'mqpar.xml')
 
 isMatc = list(para['value'][para['parameter'] == 'Match between runs'] == 'True')[0]
 mq_vers = list(para['value'][para['parameter'] == 'Version'])[0]
@@ -43,8 +34,6 @@ n_expe = len(list_expe)
 list_type = np.unique(evid['type'])
 list_char = np.unique(evid['charge'])
 
-checks.nrawsandexper(list_raws, list_expe)
-
 list_expe_u, uppe_dict = utils.lowercaseexpdict(list_expe, n_expe)
 
 print('loading summary.txt')
@@ -53,7 +42,6 @@ summ_qc = utils.fixsummary(summ)
 print('summary.txt done\n')
 
 expe_dict = utils.rawsexpdict(summ)
-checks.uniqueexper(expe_dict, n_raws)
 
 print('Little summary:')
 print('Files will be read from here ............ {}'.format(p.path_read))
@@ -141,27 +129,25 @@ prot = prot.reset_index(drop=True)
 prot_qc, prot_qc2 = utils.calculateproteins(prot, isMatc, isLfq, list_expe_u, uppe_dict)
 print('proteinGroups.txt done')
 
+# todo: fix export
 qc = utils.mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, allp_qc, prot_qc2, p.file_label)
-pre_name = checks.writingdirectory(p.path_write, p.file_label)
 
-utils.writeresults(qc, '_QC_Results.tab', pre_name)
-utils.writeresults(cont_qc_values, 'Contaminants.tab', pre_name)
-utils.writeresults(miss_qc_values, 'Missed_cleavages_KR.tab', pre_name)
-utils.writeresults(miss_kqc_values, 'Missed_cleavages_K.tab', pre_name)
-utils.writeresults(miss_rqc_values, 'Missed_cleavages_R.tab', pre_name)
-utils.writeresults(prot_qc, 'Protein_groups.tab', pre_name)
-utils.writeresults(type_qc_values, 'ID_per_type.tab', pre_name)
-utils.writeresults(mz_range_qc, 'ID_per_mz.tab', pre_name)
-utils.writeresults(z_range_qc, 'ID_per_charge.tab', pre_name)
-utils.writeresults(se_range_qc, 'ID_per_Scan_number.tab', pre_name)
-if isPhos:
-    utils.writeresults(phos_qc_values, 'Phospho.tab', pre_name)
-if isDeam:
-    utils.writeresults(deam_qc_values, 'Deamidations.tab', pre_name)
-if isOxid:
-    utils.writeresults(oxid_qc_values, 'Oxidations.tab', pre_name)
 
-print('\nAll done in {} seconds'.format(round((time.time() - time_01), 1)))
-print('You can find all the tables here: ' + p.path_write + p.file_label + '/')
 
-# todo: in the MQ txt folder create a file "Python_QC_done.tab"
+# utils.writeresults(qc, '_QC_Results.tab', pre_name)
+# utils.writeresults(cont_qc_values, 'Contaminants.tab', pre_name)
+# utils.writeresults(miss_qc_values, 'Missed_cleavages_KR.tab', pre_name)
+# utils.writeresults(miss_kqc_values, 'Missed_cleavages_K.tab', pre_name)
+# utils.writeresults(miss_rqc_values, 'Missed_cleavages_R.tab', pre_name)
+# utils.writeresults(prot_qc, 'Protein_groups.tab', pre_name)
+# utils.writeresults(type_qc_values, 'ID_per_type.tab', pre_name)
+# utils.writeresults(mz_range_qc, 'ID_per_mz.tab', pre_name)
+# utils.writeresults(z_range_qc, 'ID_per_charge.tab', pre_name)
+# utils.writeresults(se_range_qc, 'ID_per_Scan_number.tab', pre_name)
+# if isPhos:
+#     utils.writeresults(phos_qc_values, 'Phospho.tab', pre_name)
+# if isDeam:
+#     utils.writeresults(deam_qc_values, 'Deamidations.tab', pre_name)
+# if isOxid:
+#     utils.writeresults(oxid_qc_values, 'Oxidations.tab', pre_name)
+#
