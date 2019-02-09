@@ -3,54 +3,11 @@ import numpy as np
 import re
 
 
-def evidheaders(evid_cols, isoxid, isphos, isdeam, verbose=False):
-    """Depending on how the MQ analysis was done, it chooses which columns should be loaded from the evidence.txt file"""
-    evid_cols = evid_cols + ['Experiment']
-    evid_cols = evid_cols + ['Oxidation (M)'] if isoxid else evid_cols
-    evid_cols = evid_cols + ['Phospho (STY)'] if isphos else evid_cols
-    evid_cols = evid_cols + ['Deamidation (NQ)'] if isdeam else evid_cols
-
-    if verbose:
-        print('Columns that will be loaded from evidence.txt:')
-        print("\n".join(evid_cols))
-
-    return evid_cols
-
-
-def protheaders(prot_cols, list_expe, isexpe, islfq, ismatc, verbose=False):
-    """Depending on how the MQ analysis was done, it chooses which columns should be loaded from the proteinGroups.txt file"""
+def protheaders(prot_cols, list_expe):
+    """It add some columns which should be loaded from the proteinGroups.txt file"""
     prot_cols_isexpet = ['Intensity ' + s for s in list_expe] + ['Razor + unique peptides ' + s for s in list_expe] + ['Sequence coverage ' + s for s in list_expe + ' [%]']
-    prot_cols_islfqt = ['LFQ intensity ' + s for s in list_expe]
-    prot_cols_ismatct = ['Identification type ' + s for s in list_expe]
-    prot_cols = prot_cols + prot_cols_isexpet if isexpe else prot_cols
-    prot_cols = prot_cols + prot_cols_islfqt if islfq else prot_cols
-    prot_cols = prot_cols + prot_cols_ismatct if ismatc else prot_cols
-
-    if verbose:
-        print('Columns that will be loaded from proteinGroups.txt:')
-        print("\n".join(prot_cols))
-
+    prot_cols = prot_cols + prot_cols_isexpet
     return prot_cols
-
-
-
-def read_first(mqoutput):
-    """Reads first 10 rows of a MQ txt file (all columns) changing column headers
-    (some header renaming, all lowercases, no spaces, no slashes, no parenthesis)
-    Used to check from evidence.txt how the MQanalysis was done (phospho? oxidations?...)"""
-
-    df = pd.read_table(mqoutput, sep='\t', nrows=10)
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
-    return df
-
-
-def read_mq_small(mqoutput, selection):
-    """Reads all rows of a MQ txt file (selected columns) changing column headers
-    (some header renaming, all lowercases, no spaces, no slashes, no parenthesis)"""
-
-    df = pd.read_table(mqoutput, usecols=selection, sep='\t')
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
-    return df
 
 
 def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_end=120, boxplot_slice=10, mz_slice=100):
@@ -63,7 +20,6 @@ def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_en
     If a retention_time column is present: it keeps only values >= 'time_start' and <= 'time_end'
     If present, it filters out 'reverse' and 'only_identified_by_site' 
     If a mz column is present: it makes a 'mz_range' column by 'mz_slice' values"""
-
     df = pd.read_table(mqoutput, usecols=selection, sep='\t')
     column_dict = {'Contaminant': 'Potential_contaminant',
                    'Av_ Absolute Mass Deviation': 'Av_ Absolute Mass Deviation [ppm]'}
@@ -88,19 +44,11 @@ def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_en
     return df
 
 
-def segm(df, time_min, time_max):
-    """If a retention_time column is present: it keeps only values >= 'time_min' and <= 'time_max'"""
-    if 'retention_time' in list(df.columns):
-        df = df[(df.retention_time >= time_min) & (df.retention_time <= time_max)]
-    return df
-
-
-def make_the_bins(df, list_raws, column_values, column_of_interest, criteria, verbose=False):
+def make_the_bins(df, list_raws, column_values, column_of_interest, criteria):
     """From a dataframe (1st argument), it counts how many total values are present in the column whose header is the 4rd argument
     Then it calculates how many of these values are equal to the value given in the 5th argument.
     Calculations are split for ranges, defined in the column whose header is the 3nd argument.
     All this doesn't go to the big table, but it is great for plots"""
-
     qc = pd.DataFrame(columns=['rawfile', column_values, 'total', column_of_interest])
     list_values = np.sort(np.unique(df[column_values]))
 
@@ -112,10 +60,6 @@ def make_the_bins(df, list_raws, column_values, column_of_interest, criteria, ve
             new_row = [[list_raws[p], list_values[i], len(df2), len(df2[df2[column_of_interest] == criteria])]]
             qc = qc.append(pd.DataFrame(new_row, columns=['rawfile', column_values, 'total', column_of_interest]),
                            ignore_index=True)
-
-            if verbose:
-                print(new_row)
-
     qc['id_rate'] = ''
 
     for i in range(len(qc)):
@@ -126,8 +70,7 @@ def make_the_bins(df, list_raws, column_values, column_of_interest, criteria, ve
     return qc
 
 
-def make_the_pct(df, list_raws, column_of_interest, criteria, isinclude=False, verbose=False):
-
+def make_the_pct(df, list_raws, column_of_interest, criteria, isinclude=False):
     """From a dataframe (1st argument), it counts how many total values are present in the column whose header is the 3rd argument
     Then it calculates by default how many of these values are different to the value given in the 4th argument (missed cleavages...)
     if isinclude=True, it calculates how many of these values are equal to the value given in the 4th argument (contaminants...)
@@ -143,8 +86,6 @@ def make_the_pct(df, list_raws, column_of_interest, criteria, isinclude=False, v
         freq = freq if isinclude else (100 - freq)
         new_row = [[list_raws[p], freq]]
         qc2 = qc2.append(pd.DataFrame(new_row, columns=['raw_file', column_of_interest]), ignore_index=True)
-        if verbose:
-            print(new_row)
     return qc1, qc2
 
 
@@ -157,24 +98,13 @@ def run_qc(df, columns_of_interest, output_name, time_min=20, time_max=90):
     return df_qc
 
 
-def lowercaseexpdict(list_expe, n_expe, verbose=False):
+def lowercaseexpdict(list_expe, n_expe):
     list_expe_u = list_expe.copy()
     for a in range(n_expe):
         list_expe_u[a] = list_expe[a].strip().lower().replace(' ', '_').replace('/', '').replace('(', '').replace(')', '')
     uppe_dict = dict(zip(list_expe_u, list_expe))
 
-    if verbose:
-        print("{" + "\n".join("{}: {}".format(k, v) for k, v in uppe_dict.items()) + "}")
-
     return list_expe_u, uppe_dict
-
-
-def rawsexpdict(summ, verbose=False):
-    expe_dict = {summ.iloc[i]['experiment']: summ.iloc[i]['raw_file'] for i in range(len(summ))}
-    expe_dict = {k.strip().lower().replace(' ', '_').replace('/', '').replace('(', '').replace(')', ''): v for k, v in expe_dict.items()}
-    if verbose:
-        print("{" + "\n".join("{}: {}".format(k, v) for k, v in expe_dict.items()) + "}")
-    return expe_dict
 
 
 def fixsummary(summ):
@@ -222,16 +152,12 @@ def dropcontaminant(df):
     return df
 
 
-def calculateproteins(prot, ismatc, islfq, list_expe_u, uppe_dict, verbose=False):
-    if ismatc:
-        type_matc = ['By MS/MS', 'By matching']
-    else:
-        for s in list_expe_u:
-            prot['identification_type_' + s] = 'By MS/MS no MBR'
-        type_matc = ['By MS/MS no MBR']
+def calculateproteins(prot, list_expe_u, uppe_dict, verbose=False):
+    for s in list_expe_u:
+        prot['identification_type_' + s] = 'By MS/MS no MBR'
+    type_matc = ['By MS/MS no MBR']
 
     prot_qc_columns = ['experiment', 'type', 'sequence_coverage', 'intensity', 'razor_+_unique peptides']
-    prot_qc_columns = prot_qc_columns + ['lfq_intensity'] if islfq else prot_qc_columns
 
     if verbose:
         print('We will calculate prGroups for:')
@@ -245,19 +171,10 @@ def calculateproteins(prot, ismatc, islfq, list_expe_u, uppe_dict, verbose=False
             col_2 = 'intensity_' + list_expe_u[p]
             col_3 = 'razor_+_unique_peptides_' + list_expe_u[p]
             col_4 = 'identification_type_' + list_expe_u[p]
-            if islfq:
-                col_5 = 'lfq_intensity_' + list_expe_u[p]
             sequence_coverage = np.sum((df[col_1] > 0) & (df[col_4] == type_matc[i]))
             intensity = np.sum((df[col_2] > 0) & (df[col_4] == type_matc[i]))
             razor_unique_peptides = np.sum((df[col_3] > 1) & (df[col_4] == type_matc[i]))
-            if islfq:
-                lfq = np.sum((df[col_5] > 0) & (df[col_4] == type_matc[i]))
-            if islfq:
-                new_row = [[list_expe_u[p], type_matc[i], sequence_coverage, intensity, razor_unique_peptides, lfq]]
-            else:
-                new_row = [[list_expe_u[p], type_matc[i], sequence_coverage, intensity, razor_unique_peptides]]
-            if verbose:
-                print(new_row)
+            new_row = [[list_expe_u[p], type_matc[i], sequence_coverage, intensity, razor_unique_peptides]]
             prot_qc = prot_qc.append(pd.DataFrame(new_row, columns=prot_qc_columns), ignore_index=True)
     prot_qc['experiment'].replace(uppe_dict, inplace=True)
     prot_qc2 = prot_qc.groupby(['experiment'])[
@@ -265,7 +182,7 @@ def calculateproteins(prot, ismatc, islfq, list_expe_u, uppe_dict, verbose=False
     return prot_qc, prot_qc2
 
 
-def mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, allp_qc, prot_qc2, file_label):
+def mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, allp_qc, prot_qc2, file_label=''):
     qc = summ_qc.merge(mssc_qc, on='raw_file').merge(msms_qc, on='raw_file').merge(evid_qc, on='raw_file').merge(miss_qc_pct, on='raw_file').merge(cont_qc_pct, on='raw_file').merge(allp_qc, on='raw_file')
     qc = pd.merge(qc, prot_qc2, on='experiment')
     qc['file_label'] = file_label
