@@ -18,7 +18,7 @@ evid = ['Raw file', 'Retention time', 'Reverse', 'Potential contaminant', 'Misse
              'Score', 'Delta score', 'Intensity', 'Type', 'Uncalibrated mass error [ppm]', 'm/z',
              'Calibrated retention time', 'Calibrated retention time start', 'Calibrated retention time finish',
              'Modified sequence', 'Charge',
-             'Retention time calibration', 'MS/MS count']
+             'Retention time calibration', 'MS/MS count', 'Experiment', 'Oxidation (M)']
 allp = ['Raw file', 'Retention time', 'Number of scans', 'Retention length', 'Type', 'Retention length (FWHM)',
              'Intensity', 'MSMS Scan Numbers', 'Sequence', 'Charge', 'm/z']
 prot = ['Protein IDs', 'Protein names', 'Gene names', 'Fasta headers', 'Number of proteins', 'Mol. weight [kDa]',
