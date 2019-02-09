@@ -1,4 +1,3 @@
-
 rule extract_qc_metrics:
     input:
         'F:/Python_tests/Mq16210_ExpON_MbrON_LFQON/',
