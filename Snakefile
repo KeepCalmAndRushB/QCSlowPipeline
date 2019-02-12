@@ -9,5 +9,3 @@ rule extract_qc_metrics:
 
 
 
-
-python main.py F:/Python_tests/Mq16210_ExpON_MbrON_LFQON/ F:/Results/
