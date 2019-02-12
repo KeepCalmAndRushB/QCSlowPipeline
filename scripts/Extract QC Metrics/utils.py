@@ -24,7 +24,9 @@ def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_en
     column_dict = {'Contaminant': 'Potential_contaminant',
                    'Av_ Absolute Mass Deviation': 'Av_ Absolute Mass Deviation [ppm]'}
     df.columns = [column_dict.get(x, x) for x in df.columns]
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.remove('/').str.remove('(').str.remove(')')
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('/', '').str.replace('(',
+                                                                                                           '').str.replace(
+        ')', '')
     if ('raw_file' in list(df.columns)) & (len(list_raws) > 0):
         df = df.loc[df['raw_file'].isin(list_raws)]
         df = df.loc[df['raw_file'].str.contains(filter_ms)]
