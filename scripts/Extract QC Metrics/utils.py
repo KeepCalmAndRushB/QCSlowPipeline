@@ -184,23 +184,5 @@ def calculateproteins(prot, list_expe_u, uppe_dict, verbose=False):
     return prot_qc, prot_qc2
 
 
-def mergeandfix(summ_qc, mssc_qc, msms_qc, evid_qc, miss_qc_pct, cont_qc_pct, allp_qc, prot_qc2, file_label=''):
-    qc = summ_qc.merge(mssc_qc, on='raw_file').merge(msms_qc, on='raw_file').merge(evid_qc, on='raw_file').merge(miss_qc_pct, on='raw_file').merge(cont_qc_pct, on='raw_file').merge(allp_qc, on='raw_file')
-    qc = pd.merge(qc, prot_qc2, on='experiment')
-    qc['file_label'] = file_label
-    qc['comment'] = ''
-    qc['instrument'] = ''
-    for i in range(len(qc)):
-        qc.loc[i, 'instrument'] = re.compile('QEp[0-9]|QX[0-9]|Orbi[0-9]').findall(qc['raw_file'][i])
-    qc['date'] = ''
-    for i in range(len(qc)):
-        if bool(re.compile('\\d{12}$').search(qc['raw_file'][i])):
-            qc.loc[i, 'date'] = re.compile('\\d{12}$').findall(qc['raw_file'][i])
-            qc.loc[i, 'date'] = re.compile('^\\d{6}').findall(qc['date'][i])
-            qc.loc[i, 'date'] = '20' + qc['date'][i]
-        else:
-            qc.loc[i, 'date'] = re.compile('^\\d{8}').findall(qc['raw_file'][i])
 
-    qc = qc.iloc[:, [52, 55, 53, 54, 0, 7, 10, 2, 3, 12, 11, 4, 5, 8, 9, 6, 17, 13, 14, 16, 27, 28, 29, 32, 33, 30, 31, 34, 35, 22, 21, 18, 19, 20, 24, 23, 25, 26, 45, 44, 15, 38, 39, 40, 41, 37, 36, 42, 43, 46, 47, 48, 1, 49, 50, 51]]
-    return qc
 

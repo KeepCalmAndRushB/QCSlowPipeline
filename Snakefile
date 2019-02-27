@@ -1,6 +1,6 @@
 rule extract_qc_metrics:
     input:
-        'O:/20190226_QX7_ChDe_MA_HeLa_500ng_LC01/',
+        'O:/20190226_QX4_JoSw_MA_HeLa_500ng_LC11/',
         'F:/Results/'
     output:
         'F:/Results/proteinGroups.tab'
