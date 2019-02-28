@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import glob
+
 
 def clear_parameter_tree(xml_tree):
     """Returns an xml tree object from MaxQuant's mqpar.xml that has some parts missing."""
@@ -27,21 +27,19 @@ def fill_parameter_tree(tree, filename):
         element.text = text
         next(tree.iter(child)).append(element)
 
-template_filename = 'D:\MaxQuant\mqpar.xml'
+def main(rawfilename, template_filename, num_threads, parameterfilename):
 
-tree = ET.parse(template_filename)
-clear_parameter_tree(tree)
+    tree = ET.parse(template_filename)
+    clear_parameter_tree(tree)
+
+    fill_parameter_tree(tree, filename=rawfilename)
+
+    numThreads = next(tree.iter('numThreads'))
+    numThreads.text = str(num_threads)
+    # ET.dump(numThreads)
+
+    tree.write(parameterfilename)
 
 
-File = glob.glob(analysis_directory + '/*HeLa*.raw')
-File1 = File[0]
-
-fill_parameter_tree(tree, filename=File1)
-
-xxx =str(2) # number of threads
-
-numThreads = next(tree.iter('numThreads'))
-numThreads.text = str(xxx)
-# ET.dump(numThreads)
-
-tree.write(analysis_directory+'\mqpar.xml')
+if __name__ == '__main__':
+    main(rawfilename, template_filename, num_threads, parameterfilename)

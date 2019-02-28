@@ -20,7 +20,7 @@ rule prepare_max_quant_analysis
     output:
         'D:/singleRAW/{filename}/mqpar.xml'
     shell:
-        python scripts/'Prepare Max Quant/preparemaxquant.py {input[0]} {input[1]}
+        python scripts/'Prepare Max Quant/preparemaxquant.py {input[1]} {input[2]} {params.threads} {output}
 
 rule run_max_quant_analysis:
     input:
