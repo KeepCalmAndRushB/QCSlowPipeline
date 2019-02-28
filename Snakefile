@@ -2,13 +2,10 @@ rule copy_raw_file
     input:
         MS12
         # new file detected...
-    params:
-        filesize
-        age
     output:
         'D:/singleRAW/{newfolder}/{newraw}'
     shell:
-        "python scripts/'Copy RAW files'/copyrawfile.py {input[0]} {input[1]}"
+        "copy {input[0]} {input[1]}"
 
 rule prepare_max_quant_analysis
     input:
