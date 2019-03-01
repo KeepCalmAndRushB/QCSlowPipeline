@@ -1,9 +1,9 @@
 rule extract_qc_metrics:
     input:
-        'O:/20190227_QX4_JoSw_MA_HeLa_500ng_LC11/',
+        'O:/20190228_QX1_ChDe_MA_HeLa_200ng_LC14_DMSO_2/',
         'F:/Results/'
     output:
-        'F:/Results/proteinGroups.tab'
+        'F:/Results/QC_All_together.tab'
     shell:
         "python scripts/'Extract QC Metrics'/main.py {input[0]} {input[1]}"
 
