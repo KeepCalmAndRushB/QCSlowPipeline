@@ -1,3 +1,12 @@
+rule copy_raw_file
+    input:
+        MS12
+        # new file detected...
+    output:
+        'D:/singleRAW/{newfolder}/{newraw}'
+    shell:
+        "copy {input[0]} {input[1]}"
+
 rule prepare_max_quant_analysis
     input:
         "data/fasta/20190110_HomoSapiens_95965entries.fasta"
@@ -7,8 +16,8 @@ rule prepare_max_quant_analysis
         threads = 2
     output:
         'D:/singleRAW/{filename}/mqpar.xml'
-      shell:
-       # 'modify mqpar file script'
+    shell:
+        python scripts/'Prepare Max Quant/preparemaxquant.py {input[1]} {input[2]} {params.threads} {output}
 
 rule run_max_quant_analysis:
     input:
