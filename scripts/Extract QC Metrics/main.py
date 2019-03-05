@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import columns as cols
 import utils
+import graphs
 
 def main(path_read, path_write, filter_ms='QEp|QX'):
 
@@ -23,7 +24,7 @@ def main(path_read, path_write, filter_ms='QEp|QX'):
     evid_qc1 = utils.run_qc(evid, cols.evid_QC1, 'evidence.txt')
     evid_qc2 = utils.run_qc(evid[evid['type'] != 'MSMS'], cols.evid_QC2, 'evidence.txt')
 
-    evid_qc = evid_qc1.merge(evid_qc2, on='raw_file').merge(cont_qc_pct, on='raw_file').merge(miss_qc_pct, on='raw_file')
+    evid_qc = evid_qc1.merge(evid_qc2, on='raw_file').merge(miss_qc_pct, on='raw_file').merge(cont_qc_pct, on='raw_file')
 
     evid_qc.to_csv(path_write + 'QC_evid.tab', sep='\t', header=True, index=False)
     cont_qc_values.to_csv(path_write + 'D_evid_cont.tab', sep='\t', header=True, index=False)
@@ -84,12 +85,11 @@ def main(path_read, path_write, filter_ms='QEp|QX'):
     qc = utils.mergeandsql(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2)
     qc.to_csv(path_write + 'QC_All_together.tab', sep='\t', header=True, index=False)
 
-
 if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser(description="Extract QC Metrics.")
-    parser.add_argument('--path_read', default='O:/20190227_QEp5_AnPi_MA_HeLa_1ug_50cm_Easy12_03_01/', help="The Folder with one MQ-analyzed RAWfile")
+    parser.add_argument('--path_read', default='O:/20190228_QX7_ChDe_MA_HeLa_500ng_LC01/', help="The Folder with one MQ-analyzed RAWfile")
     parser.add_argument('--path_write', default='F:/Results/', help="The Folder where we save for now the QC results in tab format")
 
     args = parser.parse_args()
