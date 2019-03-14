@@ -25,13 +25,13 @@ rule prepare_max_quant_analysis:
 
 rule run_max_quant_analysis:
     input:
-        r'D:/2/test/mqpar.xml',
-        r'D:/2/test/test.raw',
+        r'D:/1/test/mqpar.xml',
+        r'D:/1/test/test.raw',
         r"data/fasta/20190110_HomoSapiens_95965entries.fasta"
     output:
-        'D:/Scripttest/{filename}/combined/txt/summary.txt'
+        'D:/1/test/combined/txt/summary.txt'
     shell:
-        "D:\\MaxQuant\\bin\\MaxQuantCmd.exe {input[0]}"
+        "C:\\MQ\\MaxQuant\\bin\\MaxQuantCmd.exe {input[0]}"
 
 rule extract_qc_metrics:
     input:
