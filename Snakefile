@@ -12,22 +12,22 @@ rule copy_raw_file:
 
 rule prepare_max_quant_analysis:
     input:
-        "data/fasta/20190110_HomoSapiens_95965entries.fasta",
-        'D:/1/test/test.raw',
-        'C:/MQ/mqpar.xml',
-        'D:/1/test'
+        r"data/fasta/20190110_HomoSapiens_95965entries.fasta",
+        r'D:/1/test/test.raw',
+        r'C:/MQ/mqpar.xml',
+        r'D:/1/test'
     params:
         threads = 2
     output:
-        'D:/1/test/mqpar.xml'
+        r'D:/1/test/mqpar.xml'
     shell:
-        "python scripts/prepare_max_quant_analysis/preparemaxquant.py {input[0]} {input[1]} {input[2]} {input[3]} {params.threads} {output}"
+        r"python scripts/prepare_max_quant_analysis/preparemaxquant.py {input[1]} {input[2]} {input[3]} {params.threads}"
 
 rule run_max_quant_analysis:
     input:
-        'D:/Scripttest/{filename}/mqpar.xml',
-        'D:/Scripttest/{filename}/{filename}.raw',
-        "data/fasta/20190110_HomoSapiens_95965entries.fasta"
+        r'D:/2/test/mqpar.xml',
+        r'D:/2/test/test.raw',
+        r"data/fasta/20190110_HomoSapiens_95965entries.fasta"
     output:
         'D:/Scripttest/{filename}/combined/txt/summary.txt'
     shell:
