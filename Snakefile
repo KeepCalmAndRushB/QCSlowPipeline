@@ -1,34 +1,35 @@
-rule copy_raw_file
-    input:
-        'D:/singleRAW/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1.raw'
-        'D:/Scripttest/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1.raw'
-    output:
-        'D:/Scripttest/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1.raw'
-        'D:/Scripttest/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1'
+rule create_folder:
+    input: r'D:\1\test.raw'
+    output: directory (r'D:\1\test')
     shell:
-        "mkdir D:/Scripttest/20190108_QX0_AlRe_MA_HeLa_500ng_LC05_1"
-        "copy {input[0]} {output[0]}"
+        r'mkdir D:\1\test'
 
-rule prepare_max_quant_analysis
+rule copy_raw_file:
+    input: r'D:\1\test'
+    output: r'D:\1\test\test.raw'
+    shell:
+        r"copy D:\1\test.raw D:\1\test\test.raw"
+
+rule prepare_max_quant_analysis:
     input:
-        "data/fasta/20190110_HomoSapiens_95965entries.fasta"
-        'D:/singleRAW/{filename}/{filename}.raw'
-        'D:/MaxQuant/mqpar.xml'
-        analysis_directory
+        "data/fasta/20190110_HomoSapiens_95965entries.fasta",
+        'D:/1/test/test.raw',
+        'C:/MQ/mqpar.xml',
+        'D:/1/test'
     params:
         threads = 2
     output:
-        'D:/singleRAW/{filename}/mqpar.xml'
+        'D:/1/test/mqpar.xml'
     shell:
-        python scripts/'Prepare Max Quant/preparemaxquant.py {input[1]} {input[2]} {input3} {input4} {params.threads} {output}
+        "python scripts/prepare_max_quant_analysis/preparemaxquant.py {input[0]} {input[1]} {input[2]} {input[3]} {params.threads} {output}"
 
 rule run_max_quant_analysis:
     input:
-        'D:/singleRAW/{filename}/mqpar.xml',
-        'D:/singleRAW/{filename}/{filename}.raw',
+        'D:/Scripttest/{filename}/mqpar.xml',
+        'D:/Scripttest/{filename}/{filename}.raw',
         "data/fasta/20190110_HomoSapiens_95965entries.fasta"
     output:
-        'D:/singleRAW/{filename}/combined/txt/summary.txt'
+        'D:/Scripttest/{filename}/combined/txt/summary.txt'
     shell:
         "D:\\MaxQuant\\bin\\MaxQuantCmd.exe {input[0]}"
 
