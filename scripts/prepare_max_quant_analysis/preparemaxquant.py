@@ -47,8 +47,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Prepare MaxQuant Analysis.")
     parser.add_argument('rawfilename', default='D:/1/test/test.raw', help="Raw-File Path in analysis directory")
     parser.add_argument('template_filename', default='C:/MQ/mqpar.xml', help="MQ parameter file complete path")
-    parser.add_argument('directory', default='D:/1/test', help="The Folder where the MQ analysis will take place")
     parser.add_argument('threads', default=2, help="Number of threads used for analysis (default=2)")
+    parser.add_argument('adir', default='D:/2', help="Number of threads used for analysis (default=2)")
     args = parser.parse_args()
-    main(rawfilename=args.rawfilename, template_filename=args.template_filename, analysis_directory=args.directory, num_threads=args.threads)
+    main(rawfilename=args.rawfilename, template_filename=args.template_filename, num_threads=args.threads, analysis_directory=args.adir)
 
