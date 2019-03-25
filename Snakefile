@@ -61,6 +61,5 @@ rule add_metrics_to_database:
         join(Destdir, '{filename}/QC_Results.tab')
     output:
         join(Destdir, '{filename}/added_to_database')
-    run:
-        with open(output, 'w'):
-            pass
+    shell:
+        "python scripts/'Metrics to database'/main.py {input}"

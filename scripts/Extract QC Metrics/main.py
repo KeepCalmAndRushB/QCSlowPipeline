@@ -82,14 +82,14 @@ def main(path_read, filter_ms='QEp|QX'):
     prot_qc.to_csv(path_write + 'D_prot.tab', sep='\t', header=True, index=False)
     print("prot")
 
-    qc = utils.mergeandsql(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2)
+    qc = utils.merge(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2)
     qc.to_csv(path_read + 'QC_Results.tab', sep='\t', header=True, index=False)
 
 if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser(description="Extract QC Metrics.")
-    parser.add_argument('--path_read', default='O:/20190323_QX4_MePh_MA_HeLa_500ng_LC13/', help="The Folder with one MQ-analyzed RAWfile")
+    parser.add_argument('--path_read', default='O:/20190319_QX4_MePh_MA_HeLa_500ng_LC11/', help="The Folder with one MQ-analyzed RAWfile")
 
     args = parser.parse_args()
 

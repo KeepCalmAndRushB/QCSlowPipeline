@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 import re
-import mysql.connector
-from sqlalchemy import create_engine
-
 
 def protheaders(prot_cols, list_expe):
     """It add some columns which should be loaded from the proteinGroups.txt file"""
@@ -22,7 +19,7 @@ def read_mq_big(mqoutput, selection, list_raws, filter_ms, time_start=0, time_en
     If a retention_time column is present: it keeps only values >= 'time_start' and <= 'time_end'
     If present, it filters out 'reverse' and 'only_identified_by_site' 
     If a mz column is present: it makes a 'mz_range' column by 'mz_slice' values"""
-    df = pd.read_table(mqoutput, usecols=selection, sep='\t')
+    df = pd.read_csv(mqoutput, usecols=selection, sep='\t')
     column_dict = {'Contaminant': 'Potential_contaminant',
                    'Av_ Absolute Mass Deviation': 'Av_ Absolute Mass Deviation [ppm]'}
     df.columns = [column_dict.get(x, x) for x in df.columns]
@@ -187,7 +184,7 @@ def calculateproteins(prot, list_expe_u, uppe_dict, verbose=False):
 
 
 
-def mergeandsql(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2):
+def merge(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2):
     qc = summ_qc.merge(mssc_qc, on='raw_file').merge(msms_qc, on='raw_file').merge(evid_qc, on='raw_file').merge(allp_qc, on='raw_file')
     qc = pd.merge(qc, prot_qc2, on='experiment')
     qc['file_label'] = ''
@@ -206,6 +203,4 @@ def mergeandsql(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2):
 
     qc = qc.iloc[:, [52, 55, 53, 54, 0, 7, 10, 2, 3, 12, 11, 4, 5, 8, 9, 6, 17, 13, 14, 16, 27, 28, 29, 32, 33, 30, 31, 34, 35, 22, 21, 18, 19, 20, 24, 23, 25, 26, 45, 44, 15, 38, 39, 40, 41, 37, 36, 42, 43, 46, 47, 48, 1, 49, 50, 51]]
 
-    engine = create_engine('mysql+mysqlconnector://root:qx1qx2@127.0.0.1:3306/msqc_slow', echo=False)
-    qc.to_sql(name='qc_all_together', con=engine, if_exists='append', index=False)
     return qc
