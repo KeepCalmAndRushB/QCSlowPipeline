@@ -2,11 +2,16 @@ import os
 from os.path import join, dirname
 import shutil
 
-rawdirectory = 'C:/1/'
-Destdir = 'D:/2/'
+rawdirectory = 'Y:/QHFX2/2019'
+Destdir = 'Y:/2/'
+maxquant_dir = 'W:/Users/Christian D/MQ16210 Maint'
 
-raw_files = glob_wildcards(join(rawdirectory, '{filename}.raw'))
-print(raw_files)
+raw_files, = glob_wildcards(join(rawdirectory, '{filename}.raw'))
+raw_files = raw_files[:3]
+
+
+rule all:
+    input: expand(join(Destdir, '{filename}/added_to_database'), filename=raw_files)
 
 
 rule copy_raw_file:
@@ -21,7 +26,7 @@ rule copy_raw_file:
 rule prepare_max_quant_analysis:
     input:
         join(Destdir, '{filename}/{filename}.raw'),
-        'C:/MQ/mqpar.xml'
+        join(maxquant_dir, 'mqpar.xml')
     params:
         threads = 2,
         adir = join(Destdir, '{filename}')
@@ -37,17 +42,18 @@ rule run_max_quant_analysis:
     output:
         join(Destdir, '{filename}/maxquant_finished')
     shell:
-        "C:/MQ/MaxQuant/bin/MaxQuantCmd.exe {input[0]}"
-        "find /c "Finish writing tab" D:/2/{filename}/combined/proc/#runningTimes.txt && (echo yes > D:/2/{filename}/maxquant_finished.txt)"
+        "{maxquant_dir}/bin/MaxQuantCmd.exe {input[0]} && (find /c 'Finish writing tab' D:/2/{{filename}}/combined/proc/#runningTimes.txt) && (echo yes > D:/2/{{filename}}/maxquant_finished.txt)"
+
 
 rule extract_qc_metrics:
     input:
-        join(Destdir, '{filename}/'),
         join(Destdir, '{filename}/maxquant_finished')
+    params:
+        outdir = join(Destdir, '{filename}/')
     output:
         join(Destdir, '{filename}/combined/txt/QC_Results.tab')
     shell:
-        "python scripts/'Extract QC Metrics'/main.py {input[0]}"
+        "python scripts/'Extract QC Metrics'/main.py {params.outdir}"
 
 
 rule add_metrics_to_database:
@@ -58,6 +64,3 @@ rule add_metrics_to_database:
     run:
         with open(output, 'w'):
             pass
-
-rule all:
-    input: expand(join(Destdir, '{filename}/added_to_database'), filename=raw_files)
