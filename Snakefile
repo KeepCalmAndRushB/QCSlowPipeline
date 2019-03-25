@@ -51,14 +51,14 @@ rule extract_qc_metrics:
     params:
         outdir = join(Destdir, '{filename}/')
     output:
-        join(Destdir, '{filename}/combined/txt/QC_Results.tab')
+        join(Destdir, '{filename}/QC_Results.tab')
     shell:
         "python scripts/'Extract QC Metrics'/main.py {params.outdir}"
 
 
 rule add_metrics_to_database:
     input:
-        join(Destdir, '{filename}/combined/txt/QC_Results.tab')
+        join(Destdir, '{filename}/QC_Results.tab')
     output:
         join(Destdir, '{filename}/added_to_database')
     run:

@@ -46,7 +46,6 @@ def main(path_read, filter_ms='QEp|QX'):
     mssc = utils.read_mq_big(path_read + 'combined/txt/msScans.txt', cols.mssc, list_raws, filter_ms)
     mssc = utils.fixmssc(mssc)
     mssc_qc = utils.run_qc(mssc, cols.mssc_QC, 'msScans.txt')
-
     mssc_qc.to_csv(path_write + 'QC_mssc.tab', sep='\t', header=True, index=False)
 
     print("mssc")
