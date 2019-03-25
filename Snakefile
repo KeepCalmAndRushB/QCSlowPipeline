@@ -51,7 +51,7 @@ rule run_max_quant_analysis:
         expand('D:\\2\\{filename}\\{filename}.raw', filename=raw_files),
         "data\\fasta\\20190110_HomoSapiens_95965entries.fasta"
     output:
-        expand('D:\\1\\{filename}\\combined\\txt\\summary.txt', filename=raw_files)
+        expand('D:\\2\\{filename}\\combined\\txt\\summary.txt', filename=raw_files)
     shell:
         "C:\\MQ\\MaxQuant\\bin\\MaxQuantCmd.exe {input[0]}"
 
