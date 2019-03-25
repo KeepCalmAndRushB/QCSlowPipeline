@@ -3,7 +3,9 @@ import numpy as np
 import columns as cols
 import utils
 
-def main(path_read, path_write, filter_ms='QEp|QX'):
+def main(path_read, filter_ms='QEp|QX'):
+
+    path_write = path_read + 'combined/txt/'
 
     evid = utils.read_mq_big(path_read + 'combined/txt/evidence.txt', cols.evid, '', filter_ms)
     evid = utils.fixevidence(evid)
@@ -82,15 +84,14 @@ def main(path_read, path_write, filter_ms='QEp|QX'):
     print("prot")
 
     qc = utils.mergeandsql(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2)
-    qc.to_csv(path_write + 'QC_All_together.tab', sep='\t', header=True, index=False)
+    qc.to_csv(path_read + 'QC_Results.tab', sep='\t', header=True, index=False)
 
 if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser(description="Extract QC Metrics.")
-    parser.add_argument('--path_read', default='O:/20190228_QX7_ChDe_MA_HeLa_500ng_LC01/', help="The Folder with one MQ-analyzed RAWfile")
-    parser.add_argument('--path_write', default='F:/Results/', help="The Folder where we save for now the QC results in tab format")
+    parser.add_argument('--path_read', default='O:/20190323_QX4_MePh_MA_HeLa_500ng_LC13/', help="The Folder with one MQ-analyzed RAWfile")
 
     args = parser.parse_args()
 
-    main(path_read=args.path_read, path_write=args.path_write)
+    main(path_read=args.path_read)
