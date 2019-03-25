@@ -5,7 +5,7 @@ Uses Snakemake to Batch-Run Maxquant on raw files and adds QC-related metrics to
 
 The Workflow, in general, looks like this:
 
-![](img/wokflow.jpg)
+![](img/workflow.svg)
 
 ## Dependencies:
 
