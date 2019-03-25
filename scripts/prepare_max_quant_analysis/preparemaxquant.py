@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import argparse
 
 
 def clear_parameter_tree(xml_tree):
@@ -27,7 +28,7 @@ def fill_parameter_tree(tree, filename):
         element.text = text
         next(tree.iter(child)).append(element)
 
-def main(rawfilename, template_filename, num_threads, parameterfilename):
+def main(rawfilename, template_filename, analysis_directory, num_threads):
 
     tree = ET.parse(template_filename)
     clear_parameter_tree(tree)
@@ -38,8 +39,16 @@ def main(rawfilename, template_filename, num_threads, parameterfilename):
     numThreads.text = str(num_threads)
     # ET.dump(numThreads)
 
-    tree.write(parameterfilename)
+    tree.write(analysis_directory + "\mqpar.xml")
+
 
 
 if __name__ == '__main__':
-    main(rawfilename, template_filename, num_threads, parameterfilename)
+    parser = argparse.ArgumentParser(description="Prepare MaxQuant Analysis.")
+    parser.add_argument('rawfilename', default='D:/1/test/test.raw', help="Raw-File Path in analysis directory")
+    parser.add_argument('template_filename', default='C:/MQ/mqpar.xml', help="MQ parameter file complete path")
+    parser.add_argument('threads', default=2, help="Number of threads used for analysis (default=2)")
+    parser.add_argument('adir', default='D:/2', help="Number of threads used for analysis (default=2)")
+    args = parser.parse_args()
+    main(rawfilename=args.rawfilename, template_filename=args.template_filename, num_threads=args.threads, analysis_directory=args.adir)
+
