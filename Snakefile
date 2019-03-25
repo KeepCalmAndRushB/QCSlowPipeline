@@ -1,69 +1,63 @@
 import os
-from os.path import join
+from os.path import join, dirname
 import shutil
 
-rawdirectory = 'C:\\1\\'
-Destdir = 'D:\\2\\'
+rawdirectory = 'C:/1/'
+Destdir = 'D:/2/'
 
-raw_files, =glob_wildcards(join(rawdirectory, '{filename}.raw'))
+raw_files = glob_wildcards(join(rawdirectory, '{filename}.raw'))
 print(raw_files)
 
-analysis_dir = join('D:\\2\\' + raw_files[0])
-
-rule all:
-    input: expand('D:\\1\\{filename}\\combined\\txt\\summary.txt', filename=raw_files)
-
-
-rule create_folder:
-    input: expand('C:\\1\\{filename}.raw', filename=raw_files)
-    output: directory(expand('D:\\2\\{filename}', filename=raw_files))
-    run:
-        pathdir = join(Destdir + raw_files[0])
-        os.mkdir(pathdir)
-        print (pathdir)
 
 rule copy_raw_file:
     input:
-        'D:\\2\\'
+        join(rawdirectory, '{filename}.raw')
     output:
-        expand('D:\\2\\{filename}\\{filename}.raw', filename=raw_files)
+        join(Destdir, '{filename}/{filename}.raw')
     run:
-        pathfrom = (join(rawdirectory + raw_files[0] + '.raw'))
-        pathto = (join('D:\\2\\' + raw_files[0] + '\\' + raw_files[0] + '.raw'))
-        shutil.copyfile(pathfrom, pathto)
+        os.makedirs(dirname(output[0]), exist_ok=True)
+        shutil.copyfile(input[0], output[0])
 
 rule prepare_max_quant_analysis:
     input:
-        r"data/fasta/20190110_HomoSapiens_95965entries.fasta",
-        expand ('D:\\2\\{filename}\\{filename}.raw', filename=raw_files),
-        r'C:/MQ/mqpar.xml',
+        join(Destdir, '{filename}/{filename}.raw'),
+        'C:/MQ/mqpar.xml'
     params:
         threads = 2,
-        adir = analysis_dir
+        adir = join(Destdir, '{filename}')
     output:
-        expand('D:/2/{filename}/mqpar.xml', filename=raw_files)
+        join(Destdir, '{filename}/mqpar.xml'),
     shell:
-        r"python scripts/prepare_max_quant_analysis/preparemaxquant.py {input[1]} {input[2]} {params.threads} {params.adir}"
+        "python scripts/prepare_max_quant_analysis/preparemaxquant.py {input[0]} {input[1]} {params.threads} {params.adir}"
 
 rule run_max_quant_analysis:
     input:
-        expand(r'D:\2\{filename}\mqpar.xml', filename=raw_files),
-        expand('D:\\2\\{filename}\\{filename}.raw', filename=raw_files),
-        "data\\fasta\\20190110_HomoSapiens_95965entries.fasta"
+        join(Destdir, '{filename}/mqpar.xml'),
+        join(Destdir, '{filename}/{filename}.raw')
     output:
-        expand('D:\\2\\{filename}\\combined\\txt\\summary.txt', filename=raw_files)
+        join(Destdir, '{filename}/maxquant_finished')
     shell:
-        "C:\\MQ\\MaxQuant\\bin\\MaxQuantCmd.exe {input[0]}"
+        "C:/MQ/MaxQuant/bin/MaxQuantCmd.exe {input[0]}"
+        "find /c "Finish writing tab" D:/2/{filename}/combined/proc/#runningTimes.txt && (echo yes > D:/2/{filename}/maxquant_finished.txt)"
 
 rule extract_qc_metrics:
     input:
-        'F:/Python_tests/Mq16210_ExpON_MbrON_LFQON/',
-        'F:/Results/'
+        join(Destdir, '{filename}/'),
+        join(Destdir, '{filename}/maxquant_finished')
     output:
-        'F:/Results/QC_Results.tab'
+        join(Destdir, '{filename}/combined/txt/QC_Results.tab')
     shell:
-        "python scripts/'Extract QC Metrics'/main.py {input[0]} {input[1]}"
+        "python scripts/'Extract QC Metrics'/main.py {input[0]}"
 
 
+rule add_metrics_to_database:
+    input:
+        join(Destdir, '{filename}/combined/txt/QC_Results.tab')
+    output:
+        join(Destdir, '{filename}/added_to_database')
+    run:
+        with open(output, 'w'):
+            pass
 
-
+rule all:
+    input: expand(join(Destdir, '{filename}/added_to_database'), filename=raw_files)
