@@ -65,5 +65,5 @@ rule extract_qc_metrics:
         "python scripts/'Extract QC Metrics'/main.py {input[0]} {input[1]}"
 
 
-hello
+
 
