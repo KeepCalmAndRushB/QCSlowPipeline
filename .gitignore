@@ -1,0 +1,4 @@
+.snakemake
+.idea
+*.pyc
+*.log
