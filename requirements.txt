@@ -1,4 +1,4 @@
-snakemake
+git+https://bitbucket.org/nickdelgrosso/snakemake
 pandas
 numpy
 mysql
