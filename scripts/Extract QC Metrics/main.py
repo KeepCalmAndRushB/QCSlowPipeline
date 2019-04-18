@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser(description="Extract QC Metrics.")
-    parser.add_argument('--path_read', default='O:/20190319_QX4_MePh_MA_HeLa_500ng_LC11/', help="The Folder with one MQ-analyzed RAWfile")
+    parser.add_argument('--path_read', default='O:/20190405_QX7_ChDe_MA_HeLa_500ng_LC01/', help="The Folder with one MQ-analyzed RAWfile")
 
     args = parser.parse_args()
 

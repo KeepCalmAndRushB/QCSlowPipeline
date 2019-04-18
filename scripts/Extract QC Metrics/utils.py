@@ -91,6 +91,9 @@ def make_the_pct(df, list_raws, column_of_interest, criteria, isinclude=False):
 
 
 def run_qc(df, columns_of_interest, output_name, time_min=20, time_max=90):
+    """From a dataframe (1st argument), it considers some columns of interest (2nd argument) and calculates
+    the median values from a time_min_ to a time_max (set by default 20-90).
+    Column headers are also changed adding the dataframe name (4th argument) and details about median calculations."""
     df = df[(df.retention_time >= time_min) & (df.retention_time <= time_max)]
     df_qc = df.groupby('raw_file')[columns_of_interest].median().reset_index()
     df_qc.columns = [
@@ -109,12 +112,16 @@ def lowercaseexpdict(list_expe, n_expe):
 
 
 def fixsummary(summ):
+    """It adds a column to the summ_QC for troubleshooting"""
     summ_qc = summ.copy()
     summ_qc['msms_submitted_peak/sil'] = summ_qc["msms_submitted_peak"] / summ_qc['msms_submitted_sil']
     return summ_qc
 
 
 def fixevidence(evid):
+    """For the evidence table: It changes retention_length to seconds and adds peaks tailing values.
+    It adds a column with the last AA of the peptide (for missed cleavages calculations).
+    Small fixes to avoid crashing in subsequent calculations (fillna)"""
     evid['resolution'] = evid['resolution'].fillna(0)
     evid['retention_length'] = evid['retention_length'] * 60
     evid['peak_Tailing_USP'] = (evid['calibrated_retention_time_finish'] - evid['calibrated_retention_time_start']) / (2 * (evid['calibrated_retention_time'] - evid['calibrated_retention_time_start']))
@@ -125,6 +132,8 @@ def fixevidence(evid):
 
 
 def fixmsms(msms):
+    """For the msms table: It logs10 the TIC and creates TIC ranges (for plotting and calculations).
+    Small fixes to avoid crashing in subsequent calculations (fillna)"""
     msms['rawovftt'] = msms['rawovftt'].fillna(0)
     msms['ion_injection_time'] = msms['ion_injection_time'].fillna(0)
     msms['log10_total_ion_current'] = np.log10(msms['total_ion_current'])
@@ -133,6 +142,9 @@ def fixmsms(msms):
 
 
 def fixmssc(mssc):
+    """For the msScans table: It calculates the adjusted rawovftt (corrected by CTCD).
+    It calculates spray stability and sets an upper value for graphs (2).
+    Small fixes to avoid crashing in subsequent calculations (fillna)"""
     mssc['rawovftt'] = mssc['rawovftt'].fillna(0)
     mssc['ctcd_comp'] = mssc['ctcd_comp'].fillna(0)
     mssc['rawovftt_x_ctcd_comp'] = mssc['rawovftt'] * mssc['ctcd_comp']
@@ -143,17 +155,29 @@ def fixmssc(mssc):
 
 
 def fixallp(allp):
+    """For the allPeptides table: it calculates peaks retention_length_fwhm/retention_length"""
     allp['fwhm_to_base'] = allp['retention_length_fwhm'] / allp['retention_length']
     return allp
 
 
 def dropcontaminant(df):
+    """If present, it removes lines with potential_contaminant and then deletes the column"""
     df = df[df['potential_contaminant'] != '+']
     df = df.drop(columns='potential_contaminant')
     return df
 
 
 def calculateproteins(prot, list_expe_u, uppe_dict, verbose=False):
+    """This is quite messy.
+    For each experiment, this function calculates the number of protein groups identified by maxquant:
+        sequence_coverage: it considers all pg where sequence_coverage > 0
+        intensity: it considers all pg where intensity > 0
+        razor_+_unique peptides: it considers all pg where razor_+_unique peptides > 0
+    The calculation about all pg where LFQ > 0 have been removed (LFQ is not used in our QC)
+    Output: prot_qc2
+    Moreover, in case of match between run ON it calculates also how many proteins are from MBR.
+    Output: prot_qc
+    """
     for s in list_expe_u:
         prot['identification_type_' + s] = 'By MS/MS no MBR'
     type_matc = ['By MS/MS no MBR']
@@ -185,6 +209,8 @@ def calculateproteins(prot, list_expe_u, uppe_dict, verbose=False):
 
 
 def merge(summ_qc, mssc_qc, msms_qc, evid_qc, allp_qc, prot_qc2):
+    """It merges all qc_tables. It adds some columns (instrument, date)
+    and it reorders columns to fit the big old database."""
     qc = summ_qc.merge(mssc_qc, on='raw_file').merge(msms_qc, on='raw_file').merge(evid_qc, on='raw_file').merge(allp_qc, on='raw_file')
     qc = pd.merge(qc, prot_qc2, on='experiment')
     qc['file_label'] = ''
